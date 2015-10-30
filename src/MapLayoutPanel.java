@@ -5,20 +5,14 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.AffineTransform;
 
-import javax.swing.*;
+import javax.swing.JPanel;
 
 public class MapLayoutPanel extends JPanel {
 	private static final long serialVersionUID = 1L; //make warning go away
-	private final static double DEFAULT_GRID_RECT_SIZE = 15;
 	private MapLayout layout;
 	private int panelWidth, panelHeight;
-	private double gridRectSize = DEFAULT_GRID_RECT_SIZE;
-	
-	private double zoom = 1.0;
-	
-	private AffineTransform scale = new AffineTransform();
+	private double gridRectSize = Global.DEFAULT_GRID_RECT_SIZE;
 	
 	public MapLayoutPanel(int mapX, int mapY) {
 		panelWidth = (int)(mapX * gridRectSize);
@@ -41,22 +35,11 @@ public class MapLayoutPanel extends JPanel {
 				repaint();
 			}
 		});
-
-		/*
-		 * TODO: get zoom and adding squares to work.
-		getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).
-			put(KeyStroke.getKeyStroke("UP"), "ZoomUp");
-		getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).
-			put(KeyStroke.getKeyStroke("DOWN"), "ZoomDown");
-		
-		getActionMap().put("ZoomUp", new ZoomAction(true));
-		getActionMap().put("ZoomDown", new ZoomAction(false));
-		*/
 	}
 	
 	private void addActive(Point e, boolean turnOff) {
 		Grid grid = layout.getGrid(new Grid(
-				(int)Math.round(roundToNum(e.getX()- 5	)/gridRectSize),
+				(int)Math.round(roundToNum(e.getX()- 5)/gridRectSize),
 				(int)Math.round(roundToNum(e.getY() - 5)/gridRectSize)));
 		if(!editable) {
 			layout.printGrid(grid);
@@ -75,9 +58,6 @@ public class MapLayoutPanel extends JPanel {
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		
-//		Graphics2D g2 = (Graphics2D) g;
-//		g2.setTransform(scale);
 		
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, (int)(gridRectSize * layout.width),
@@ -114,48 +94,18 @@ public class MapLayoutPanel extends JPanel {
 		editable = !editable;
 	}
 	
-	private boolean padding = true;
 	public void usePadding() {
-		padding = !padding;
+		Global.RoomUsePadding = !Global.RoomUsePadding;
 	}
 	
 	public void generateMap() {
-		clearMap();	
-		//layout.generateRooms(20, 3, padding);
-		//layout.generateMaze();
-		layout.generateMap(20, 3, padding);
+		clearMap();
+		layout.generateMap(20, 3, Global.RoomUsePadding);
 		repaint();
 	}
 
 	@Override
 	public Dimension getPreferredSize() {
-		return new Dimension((int) (panelWidth * zoom), (int) (panelHeight * zoom));
+		return new Dimension(panelWidth, panelHeight);
 	}
-	
-	private void printPair(int x, int y) {
-		System.out.println(x + ", " + y);
-	}
-	
-	/*
-	private class ZoomAction extends AbstractAction {
-		private static final long serialVersionUID = -8996046031526940733L;
-		boolean direction;
-		public ZoomAction(boolean d) {
-			direction = d;
-		}
-		
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			if(direction) {
-				zoom += (zoom < 1.3)? .1 : 0;
-			} else {
-				zoom -= (zoom > .7) ? .1 : 0;
-			}
-			zoom = (double)Math.round(zoom * 10d) / 10d;
-			gridRectSize = DEFAULT_GRID_RECT_SIZE * zoom;
-			scale.setToScale(zoom, zoom);
-			repaint();
-		}
-	}
-	*/
 }

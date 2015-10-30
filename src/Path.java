@@ -59,7 +59,6 @@ public class Path {
 					}
 				} else {
 					if(!deadEnds.contains(tpath)) {
-//						System.out.println("Adding deadend: " + tpath.data);
 						deadEnds.add(tpath);
 					}
 					if(!openPaths.isEmpty() ) {
@@ -74,7 +73,6 @@ public class Path {
 			endTime = (System.nanoTime() - startTime)/1000000;
 			if(endTime > 0) System.out.println("Create Path: " + endTime);
 		}
-//		System.out.println(deadEnds.size());
 	}
 
 	//checks is the given Rectangle is clear for path
@@ -100,7 +98,6 @@ public class Path {
 				}
 			}
 		}
-//		System.out.println(cur + ", " + open);
 		return open;
 	}
 
@@ -113,9 +110,10 @@ public class Path {
 	public void prunePath() {
 		for(TreeNode<Grid> node : deadEnds) {
 			if(node.parent != null && !node.children.isEmpty()) {
-//				System.out.println(node.data);
 				continue;
 			}
+			
+			if (Global.generateChance(Global.PathDeadEndPercent)) continue;
 			
 			TreeNode<Grid> cnode = node;
 
@@ -123,10 +121,13 @@ public class Path {
 			while(cnode.isRoot()) {
 				if(!cnode.data.isNextToDoor(map) && cnode.children.size() <= 1) {
 					map.deactivateGrid(cnode.data);
-//					map.setGrid(cnode.data, Grid.Type.TESTER);
-					TreeNode<Grid> t = cnode.children.get(0);
-					cnode.remove();
-					cnode = t;
+					if(cnode.children.size() != 0) {
+						TreeNode<Grid> t = cnode.children.get(0);
+						cnode.remove();
+						cnode = t;
+					} else {
+						cnode.remove();
+					}
 				} else {
 					break head;
 				}
@@ -136,7 +137,6 @@ public class Path {
 				while(cnode.isLeaf()) {
 					if(!cnode.data.isNextToDoor(map)) {
 						map.deactivateGrid(cnode.data);
-//					map.setGrid(cnode.data, Grid.Type.TESTER);
 						if(!(cnode.isRoot())) {
 							TreeNode<Grid> t = cnode.parent;
 							cnode.remove();

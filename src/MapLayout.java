@@ -5,7 +5,6 @@ import java.util.Map.Entry;
 
 public class MapLayout {
 	private GridMap map;
-//	public ArrayList<Grid> active;
 	public int height, width;
 	
 	private List<Path> paths;
@@ -14,17 +13,14 @@ public class MapLayout {
 		width = x;
 		height = y;
 		map = new GridMap(width, height);
-//		active = new ArrayList<Grid>();
 		paths = new ArrayList<Path>();
 	}
 	
 	public void activateGrid(Grid r) {
-//		updatePosition(r, false);
 		setGrid(r, Grid.Type.OPEN);
 	}
 	
 	public void deactivateGrid(Grid r) {
-//		updatePosition(r, true);
 		setGrid(r, Grid.Type.CLOSE);
 	}
 	
@@ -39,33 +35,7 @@ public class MapLayout {
 		}
 	}
 	
-	/**
-	 * Updates the position of the rectangle with the type of grid it will be
-	 * @param r
-	 * @param turnOff
-	 */
-//	public void updatePosition(Grid r, boolean turnOff) {
-//		try {
-//			if(r.active && turnOff) {
-//				map.get(r).setActive(false);
-//				active.remove(r);
-//			} else {
-//				map.get(r).setActive(true);
-//				active.add(r);
-//			}
-//		} catch(IndexOutOfBoundsException e) { }
-//	}
-
-//	private int hashPosn(Grid r) {
-//		return r.y * height + r.x;
-//	}
-	
 	public void clear() {
-//		for(Grid r : active) {
-//			map.get(r).active = false;
-//			map.get(r).type = Grid.Type.CLOSE;
-//		}
-//		active.clear();
 		map.clear();
 		paths.clear();
 	}
@@ -146,6 +116,7 @@ public class MapLayout {
 				
 				while(!pair.getValue().isEmpty()) {
 					Grid g = Global.popRandomFromList(pair.getValue());
+					
 					if(picked.get(0).distance(g) >= Global.RoomDoorDistance &&
 							picked.size() < Global.RoomMaxDoors) {
 						picked.add(g);
@@ -153,10 +124,6 @@ public class MapLayout {
 					}
 				}
 			}
-//			sel.put(pair.getKey(), picked);
-//			for(Grid g : pair.getValue()) {
-//				makeDoor(g);
-//			}
 		}
 		return sel;
 	}
@@ -166,6 +133,7 @@ public class MapLayout {
 		for(Room r : rooms) {
 			ArrayList<Grid> rd = new ArrayList<>();
 			for(int x = r.x; x < r.x + r.w; x++) {
+				try {
 				Grid g = map.get(x, r.y - 1);
 				Grid g2 = map.get(x, r.y - 2);
 				if(!g.active && g2.active) rd.add(g);
@@ -173,9 +141,11 @@ public class MapLayout {
 				Grid g3 = map.get(x, r.y + r.h);
 				Grid g4 = map.get(x, r.y + r.h + 1);
 				if(!g3.active && g4.active) rd.add(g3);
+				} catch(IndexOutOfBoundsException e) {}
 			}
 
 			for(int y = r.y; y < r.y + r.h; y++) {
+				try {
 				Grid g = map.get(r.x - 1, y);
 				Grid g2 = map.get(r.x - 2, y);
 				if(!g.active && g2.active) rd.add(g);
@@ -183,6 +153,7 @@ public class MapLayout {
 				Grid g3 = map.get(r.x + r.w, y);
 				Grid g4 = map.get(r.x + r.w + 1, y);
 				if(!g3.active && g4.active) rd.add(g3);
+				} catch(IndexOutOfBoundsException e) {}
 			}
 			doors.put(r, rd);
 		}

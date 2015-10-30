@@ -4,6 +4,14 @@ import java.util.Random;
 
 public final class Global {
 
+	public final static int DEFAULT_MAP_W = 41;
+	public final static int DEFAULT_MAP_H = 41;
+	public final static int DEFAULT_WINDOW_W = 975;
+	public final static int DEFAULT_WINDOW_H = 620;
+	public final static double DEFAULT_GRID_RECT_SIZE = 15;
+	
+	public static boolean RoomUsePadding = true;
+	
 	public static int PathMinLength = 2;
 	
 	public static int RoomTries = 5;
@@ -11,8 +19,11 @@ public final class Global {
 	public static int RoomAttempts = 1000;
 	public static int RoomMaxNumPlace = 3;
 	
-	public static int RoomMaxDoors = 3;
+	public static int RoomMaxDoors = 2;
 	public static int RoomDoorDistance = 10;
+	
+	public static int RoomDoorPercent = 5;
+	public static int PathDeadEndPercent = 15;
 	
 	private static Random rand = new Random();
 	
@@ -24,6 +35,12 @@ public final class Global {
 		if (max % 2 == 0) --max;
 		if (min % 2 == 0) ++min;
 		return min + 2*(int)(Math.random()*((max-min)/2+1));
+	}
+	
+	public static boolean generateChance(double percent) {
+		int r = generateRandomInt(100, 0);
+		System.out.println("Random Percent: " + r + " " + (r < percent));
+		return r < percent;
 	}
 	
 	public static <T> T getRandomFromList(List<T> list) {

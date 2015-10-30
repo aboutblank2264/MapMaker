@@ -5,10 +5,6 @@ import java.util.Arrays;
 import javax.swing.*;
 
 public class MapMaker {
-	private final static int DEFAULT_MAP_W = 41;
-	private final static int DEFAULT_MAP_H = 41;
-	private final static int DEFAULT_WINDOW_W = 975;
-	private final static int DEFAULT_WINDOW_H = 620;
 	
 	private static JFrame window;
 	private static JScrollPane mapPanelHolder;
@@ -18,10 +14,10 @@ public class MapMaker {
 	private static void createAndShowGui() {
 		window = new JFrame("Map Creator");
 		
-		mapPanel = new MapLayoutPanel(DEFAULT_MAP_W, DEFAULT_MAP_H);
+		mapPanel = new MapLayoutPanel(Global.DEFAULT_MAP_W, Global.DEFAULT_MAP_H);
 		
-		optionsPanel = new OptionsPanel(mapPanel, DEFAULT_WINDOW_H);
-		optionsPanel.setPreferredSize(new Dimension(200, DEFAULT_WINDOW_H));
+		optionsPanel = new OptionsPanel(mapPanel, Global.DEFAULT_WINDOW_H);
+		optionsPanel.setPreferredSize(new Dimension(200, Global.DEFAULT_WINDOW_H));
 		
 		mapPanelHolder = new JScrollPane(mapPanel);
 		
@@ -32,9 +28,8 @@ public class MapMaker {
 		splitpane.setResizeWeight(0);
 		
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		window.setSize(DEFAULT_WINDOW_W, DEFAULT_WINDOW_H);
+		window.setSize(Global.DEFAULT_WINDOW_W, Global.DEFAULT_WINDOW_H);
 		window.getContentPane().add(splitpane, BorderLayout.CENTER);
-//		window.setLocationByPlatform(false);
 		window.setVisible(true);
 	};
 	

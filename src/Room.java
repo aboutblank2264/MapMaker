@@ -33,7 +33,7 @@ public class Room {
 		this.w = w;
 		this.h = h;
 		
-		setSize();
+		calculateSize();
 	}
 	
 	public Room(int x, int y, int w, int h, RoomSize s) {
@@ -49,7 +49,7 @@ public class Room {
 		this.y = y;
 	}
 	
-	private void setSize() {
+	private void calculateSize() {
 		for(int i = RoomSize.getValues().length - 1; i > 0; i--) {
 			Grid s = RoomSize.get(i).size;
 			if(w > s.x && w < s.y && h > s.x && h < s.y) {
