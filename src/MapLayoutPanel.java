@@ -60,12 +60,12 @@ public class MapLayoutPanel extends JPanel {
 		super.paintComponent(g);
 		
 		g.setColor(Color.BLACK);
-		g.fillRect(0, 0, (int)(gridRectSize * layout.width),
-				(int)(gridRectSize * layout.height));
+		g.fillRect(0, 0, (int)(gridRectSize * layout.getWidth()),
+				(int)(gridRectSize * layout.getHeight()));
 
 		// draw active grids
-		for(int x = 0; x < layout.width; x++) {
-			for(int y = 0; y < layout.height; y++) {
+		for(int x = 0; x < layout.getWidth(); x++) {
+			for(int y = 0; y < layout.getHeight(); y++) {
 				Grid r = layout.getGrid(x, y); 
 				if(r.active) {
 					g.setColor(Color.LIGHT_GRAY);
@@ -94,13 +94,9 @@ public class MapLayoutPanel extends JPanel {
 		editable = !editable;
 	}
 	
-	public void usePadding() {
-		Global.RoomUsePadding = !Global.RoomUsePadding;
-	}
-	
 	public void generateMap() {
 		clearMap();
-		layout.generateMap(20, 3, Global.RoomUsePadding);
+		layout.generateMap(20, Global.RoomSize.LARGE);
 		repaint();
 	}
 

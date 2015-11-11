@@ -104,7 +104,7 @@ public class OptionsPanel extends JPanel implements ActionListener {
 		String action = e.getActionCommand();
 		switch(action) {
 		case "clear":
-			map.clearMap();
+				map.clearMap();
 			break;
 		case "refresh":
 			map.repaint();
@@ -113,12 +113,12 @@ public class OptionsPanel extends JPanel implements ActionListener {
 			map.canEdit();
 			break;
 		case "padding":
-			map.usePadding();
+			Global.RoomUsePadding = !Global.RoomUsePadding;
 			break;
 		case "generate":
-//			Thread th = new Thread(new GenerateRunner());
-//			th.start();
-			map.generateMap();
+			Thread th = new Thread(new GenerateRunner());
+			th.start();
+//			map.generateMap();
 			break;
 		}
 	}

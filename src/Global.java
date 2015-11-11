@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -17,13 +18,14 @@ public final class Global {
 	public static int RoomTries = 5;
 	public static int RoomPadding = 3;
 	public static int RoomAttempts = 1000;
-	public static int RoomMaxNumPlace = 3;
+	public static int RoomMaxNumPlace = 1;
 	
 	public static int RoomMaxDoors = 2;
 	public static int RoomDoorDistance = 10;
 	
 	public static int RoomDoorPercent = 5;
-	public static int PathDeadEndPercent = 15;
+	public static int PathDeadEndPercent = 0;
+	public static int PathSameDirectionPercent = 0;
 	
 	private static Random rand = new Random();
 	
@@ -37,10 +39,9 @@ public final class Global {
 		return min + 2*(int)(Math.random()*((max-min)/2+1));
 	}
 	
-	public static boolean generateChance(double percent) {
+	public static boolean generateChance(int percent) {
 		int r = generateRandomInt(100, 0);
-		System.out.println("Random Percent: " + r + " " + (r < percent));
-		return r < percent;
+		return percent > r;
 	}
 	
 	public static <T> T getRandomFromList(List<T> list) {
@@ -84,4 +85,31 @@ public final class Global {
 		}
 	}
 	
+	public enum RoomSize {
+		SMALL(new Grid(5,7)),
+		MEDIUM(new Grid(7,9)),
+		LARGE(new Grid(9,12)),
+		NONE(new Grid(0,0));
+		
+		public final Grid size;
+		public final int min, max;
+		RoomSize(Grid r) {
+			size = r;
+			min = r.x;
+			max = r.y;
+		}
+		public static RoomSize get(int index) {
+			return getValues().get(index);
+		}
+		
+		public RoomSize getSmaller() {
+			int r = getValues().indexOf(this);
+			if(r > 0) return RoomSize.get(r - 1);
+			else return RoomSize.get(0);
+		}
+		
+		public static List<RoomSize> getValues() {
+			return Arrays.asList(Arrays.copyOfRange(values(), 0, values().length - 1));
+		}
+	}
 }

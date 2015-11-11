@@ -2,12 +2,8 @@ import java.util.ArrayList;
 
 public class GridMap {
 	private ArrayList<ArrayList<Grid>> internal;
-	public int width;
-	public int height;
 	
 	public GridMap(int height, int width) {
-		this.width = width;
-		this.height = height;
 		internal = new ArrayList<>(width);
 		for(int i = 0; i < width; i++){
 			ArrayList<Grid> t = new ArrayList<Grid>(height);
@@ -26,41 +22,59 @@ public class GridMap {
 		return internal.get(y).get(x);
 	}
 	
-//	private void updateWidth() {
-//		int diff = width - map.width;
-//		for(ArrayList<Grid> m : map) {
-//			if(diff > 0) {
-//				for(int i = m.size(); i < width; i++) {
-//					m.add(0);
-//				}
-//			} else {
-//				for(int i = m.size()-1; i >= width; i--) {
-//					m.remove(i);
-//				}
-//			}
-//		}
-//	}
-//	
-//	private void updateHeight() {
-//		int diff = height - map.size();
-//		if(diff > 0) {
-//			for(int i = 0; i < diff; i++) {
-//				ArrayList<Integer> n = new ArrayList<Integer>();
-//				for(int j = 0; j < height; j++) {
-//					n.add(0);
-//				}
-//				map.add(n);
-//			}
-//		} else {
-//			for(int i = map.size()-1; i >= height; i--) {
-//				map.remove(i);
-//			}
-//		}
-//	}
+	public int getHeight() {
+		return internal.size();
+	}
+	
+	public int getWidth() {
+		if(internal.size() > 0) {
+			return internal.get(0).size();
+		} else {
+			return 0;
+		}
+	}
+
+	//TODO insert front or back
+	public void updateWidth(int w) {
+		int width = getWidth();
+		int diff = w - width;
+		
+		if(w != getWidth()) {
+			for(ArrayList<Grid> g : internal) {
+				if(diff > 0) {
+					for(int i = width; i < w; i++) {
+						g.add(new Grid(i,internal.indexOf(g)));
+					}
+				} else {
+					while(g.size() > w) {
+						g.remove(g.size() - 1);
+					}
+				}
+			}
+		}
+	}
+	
+	public void updateHeight(int h) {
+		int height = getHeight();
+		int diff = h - height;
+		if(diff > 0) {
+			for(int i = height; i < h; i++){
+				ArrayList<Grid> t = new ArrayList<Grid>(getWidth());
+				for (int j = 0; j < getWidth(); j++){
+					t.add(new Grid(j, i));
+				}
+				internal.add(t);
+			}
+		} else {
+			while(internal.size() > h) {
+				internal.remove(internal.size() - 1);
+			}
+		}
+	}
 	
 	public void clear() {
-		for(int i = 0; i < width; i++){
-			for (int j = 0; j < height; j++){
+		for(int i = 0; i < getWidth(); i++){
+			for (int j = 0; j < getHeight(); j++){
 				Grid g = internal.get(i).get(j);
 				g.active = false;
 				g.type = Grid.Type.CLOSE;
@@ -68,6 +82,29 @@ public class GridMap {
 		}
 	}
 	
+	@Override
+	public boolean equals(Object o) {
+		if(o == this) {
+			return true;
+		}
+		if(o == null || o.getClass() != getClass()) {
+			return false;
+		}
+		
+		GridMap m = (GridMap)o;
+		if(m.getWidth() == getWidth() && m.getHeight() == getHeight()) {
+			for(int x = 0; x < getWidth(); x++) {
+				for(int y = 0; y < getHeight(); y++) {
+					if(!m.get(x, y).equals(get(x, y))) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+	
+	@Override
 	public String toString() {
 		StringBuilder str = new StringBuilder();
 		for(ArrayList<Grid> li : internal) {

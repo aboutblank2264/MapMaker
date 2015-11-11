@@ -5,19 +5,18 @@ import java.util.Map.Entry;
 
 public class MapLayout {
 	private GridMap map;
-	public int height, width;
 	
 	private List<Path> paths;
 	
 	public MapLayout(int x, int y) {
-		width = x;
-		height = y;
-		map = new GridMap(width, height);
+		map = new GridMap(x, y);
 		paths = new ArrayList<Path>();
 	}
 	
-	public void activateGrid(Grid r) {
-		setGrid(r, Grid.Type.OPEN);
+	public void activateGrid(Grid ... g) {
+		for(Grid r : g) {
+			setGrid(r, Grid.Type.OPEN);
+		}
 	}
 	
 	public void deactivateGrid(Grid r) {
@@ -45,22 +44,19 @@ public class MapLayout {
 	 */
 	
 	public void setHeight(int h) {
-		height = h;
-		updateMap();
+		map.updateHeight(h);
 	}
 	
 	public void setWidth(int w) {
-		width = w;
-		updateMap();
+		map.updateWidth(w);
 	}
 	
-	private void updateMap() {
-//		if(map.width != width) {
-//			updateWidth();
-//		}
-//		if(map.height != height) {
-//			updateHeight();
-//		}
+	public int getWidth() {
+		return map.getWidth();
+	}
+	
+	public int getHeight() {
+		return map.getHeight();
 	}
 	
 	public Grid getGrid(int x, int y) {
@@ -79,8 +75,8 @@ public class MapLayout {
 		}
 	}
 
-	public void generateMap(int attempts, int size, boolean usePadding) {
-		List<Room> rooms = Room.generateRooms(size, usePadding, this);
+	public void generateMap(int attempts, Global.RoomSize size) {
+		List<Room> rooms = Room.generateRooms(size, this);
 		paths = generateMaze();
 		System.out.println();
 		selectDoors(findDoors(rooms));
@@ -92,11 +88,11 @@ public class MapLayout {
 	 */
 	public ArrayList<Path> generateMaze() {
 		ArrayList<Path> paths = new ArrayList<>();
-		for(int y = 1; y < height; y += 2) {
-			for(int x = 1; x < width; x += 2) {
+		for(int y = 1; y < map.getHeight(); y += 2) {
+			for(int x = 1; x < map.getWidth(); x += 2) {
 				if(getGrid(y, x) != null && !getGrid(y, x).active) {
-					Path p = new Path(this);
-					p.createPath(x, y);
+					Path p = new Path();
+					p.createPath(x, y, this);
 					paths.add(p);
 					System.out.println("Created Path: " + p.length);
 				}
@@ -167,7 +163,7 @@ public class MapLayout {
 	
 	public void prunePaths() {
 		for(Path p : paths) {
-			p.prunePath();
+			p.prunePath(this);
 		}
 	}
 	

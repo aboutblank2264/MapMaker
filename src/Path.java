@@ -2,52 +2,47 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Path {
-
-	private MapLayout map;
 	public TreeNode<Grid> path;
-	private List<TreeNode<Grid>> deadEnds = new ArrayList<>();
+	private List<TreeNode<Grid>> deadEnds;
 	public int length = 0;
-
-	public Path(MapLayout m) {
-		map = m;
-	}
-
-	public void createPath(int x, int y) {
+	
+	
+	public void createPath(int x, int y, MapLayout map) {
 
 		Grid cur = map.getGrid(y, x);
-		if(cur == null || cur.active || !isOpenPath(cur, Global.DIRECTION.NONE) ||
+		if(cur == null || cur.active || !isOpenPath(cur, Global.DIRECTION.NONE, map) ||
 				path != null) return;
 
 		path = new TreeNode<Grid>(cur);
 		map.activateGrid(cur);
 		length = 1;
+		if(deadEnds == null) deadEnds = new ArrayList<>();
 		deadEnds.add(path);
 
 		TreeNode<Grid> tpath = path;
-		List<Global.DIRECTION> d = findOpenDirections(tpath.data);
+		List<Global.DIRECTION> d = findOpenDirections(tpath.data, map);
 		Global.DIRECTION direction = Global.DIRECTION.EAST;
 
 		if(!d.isEmpty()) direction = Global.getRandomFromList(d);
 
 		List<TreeNode<Grid>> openPaths = new ArrayList<>();
-		int step_counter = 0;
+		int step_counter = 1;
 		while(true) {
 			step_counter++;
 			Grid r1 = map.getGrid(tpath.data.add(direction.rect));
 			Grid r2 = map.getGrid(r1.add(direction.rect));
-			if(isOpenPath(r1, direction) && isOpenPath(r2, direction)
-					&&
-					//don't need to check r1?
-					step_counter % Global.PathMinLength > 0) {
+			if(isOpenPath(r1, direction, map) && isOpenPath(r2, direction, map)
+					&& step_counter % Global.PathMinLength > 0) {
 				tpath = tpath.addChild(r1).addChild(r2);
-				map.activateGrid(r1);
-				map.activateGrid(r2);
+				map.activateGrid(r1, r2);
 				length += 2;
 			} else {
-				// TODO: same direction more likely
-				ArrayList<Global.DIRECTION> o = findOpenDirections(tpath.data);
+				ArrayList<Global.DIRECTION> o = findOpenDirections(tpath.data, map);
 				if(!o.isEmpty()) {
-					direction = Global.popRandomFromList(o);
+					if(!(o.contains(direction) && 
+							Global.generateChance(Global.PathSameDirectionPercent))) {
+						direction = Global.popRandomFromList(o);
+					}
 					if(!o.isEmpty()) {
 						openPaths.add(tpath);
 					}
@@ -66,7 +61,7 @@ public class Path {
 	}
 
 	//checks is the given Rectangle is clear for path
-	public boolean isOpenPath(Grid cur, Global.DIRECTION direction) {
+	public boolean isOpenPath(Grid cur, Global.DIRECTION direction, MapLayout map) {
 		if(cur == null) return false;
 		for(Global.DIRECTION dir : Global.DIRECTION.getValues()) {
 			if(dir != Global.DIRECTION.reverse(direction)) {
@@ -79,11 +74,11 @@ public class Path {
 		return true;
 	}
 
-	public ArrayList<Global.DIRECTION> findOpenDirections(Grid cur) {
+	public ArrayList<Global.DIRECTION> findOpenDirections(Grid cur, MapLayout map) {
 		ArrayList<Global.DIRECTION> open = new ArrayList<>();
 		if(cur != null) {
 			for(Global.DIRECTION dir : Global.DIRECTION.getValues()) {
-				if(isOpenPath(cur.add(dir.rect), dir)) {
+				if(isOpenPath(cur.add(dir.rect), dir, map)) {
 					open.add(dir);
 				}
 			}
@@ -97,7 +92,7 @@ public class Path {
 	 * does not have a door
 	 * within prune-[variable] strictness
 	 */
-	public void prunePath() {
+	public void prunePath(MapLayout map) {
 		for(TreeNode<Grid> node : deadEnds) {
 			if(node.parent != null && !node.children.isEmpty()) {
 				continue;
@@ -106,37 +101,47 @@ public class Path {
 			if (Global.generateChance(Global.PathDeadEndPercent)) continue;
 
 			TreeNode<Grid> cnode = node;
+			tail:
+			while(cnode.isLeaf()) {
+				if(!cnode.data.isNextToDoor(map)) {
+					map.deactivateGrid(cnode.data);
+//					map.setGrid(cnode.data, Grid.Type.TESTER);
+					if(!(cnode.isRoot())) {
+						TreeNode<Grid> t = cnode.parent;
+						cnode.remove();
+						cnode = t;
+					}
+				} else {
+					break tail;
+				}
+			}
 
 			head:
-				while(cnode.isRoot()) {
-					if(!cnode.data.isNextToDoor(map) && cnode.children.size() <= 1) {
-						map.deactivateGrid(cnode.data);
-						if(cnode.children.size() != 0) {
-							TreeNode<Grid> t = cnode.children.get(0);
-							cnode.remove();
-							cnode = t;
-						} else {
-							cnode.remove();
-						}
+			while(cnode.isRoot()) {
+				if(!cnode.data.isNextToDoor(map) && cnode.children.size() <= 1) {
+//					map.setGrid(cnode.data, Grid.Type.TESTER);
+					map.deactivateGrid(cnode.data);
+					if(cnode.children.size() != 0) {
+						TreeNode<Grid> t = cnode.children.get(0);
+						cnode.remove();
+						cnode = t;
 					} else {
-						break head;
+						cnode.remove();
 					}
+				} else {
+//					map.printNode(cnode);
+//					System.out.println();
+//					System.out.println(cnode.children.size());
+					break head;
 				}
-
-			tail:
-				while(cnode.isLeaf()) {
-					if(!cnode.data.isNextToDoor(map)) {
-						map.deactivateGrid(cnode.data);
-						if(!(cnode.isRoot())) {
-							TreeNode<Grid> t = cnode.parent;
-							cnode.remove();
-							cnode = t;
-						}
-					} else {
-						break tail;
-					}
-				}
+			}
 		}
+		deadEnds = null;
+	}
+	
+	public void clearPath() {
+		path = null;
+		length = 0;
 	}
 
 	public TreeNode<Grid> getNode(Grid g) {
