@@ -86,7 +86,7 @@ public class Room {
 		for(int y = room.y; y < room.y + room.h; y++) {
 			for(int x = room.x; x < room.x + room.w; x++) {
 				Grid g = map.getGrid(x,y);
-				if(g == null || g.active) {
+				if(g == null || (Global.RoomUsePadding && g.active)) {
 					return false;
 				}
 			}

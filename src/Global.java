@@ -1,31 +1,39 @@
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 public final class Global {
 
-	public final static int DEFAULT_MAP_W = 41;
+	public final static int MINIMUM_MAP_SIZE = 31;
+	public final static int MAXIMUM_MAP_SIZE = 151;
+	public final static int DEFAULT_MAP_W = 45;
 	public final static int DEFAULT_MAP_H = 41;
 	public final static int DEFAULT_WINDOW_W = 975;
 	public final static int DEFAULT_WINDOW_H = 620;
+	public final static int DEFAULT_OPTION_W = 175;
 	public final static double DEFAULT_GRID_RECT_SIZE = 15;
+	
+	public final static int MINIMUM_PATH_CREATE_LENGTH = 10;
+	
+	public static int MapWidth = DEFAULT_MAP_W;
+	public static int MapHeight = DEFAULT_MAP_H;
 	
 	public static boolean RoomUsePadding = true;
 	
-	public static int PathMinLength = 2;
+	public static int PathMinLength = PathLength.SHORT.length;
 	
-	public static int RoomTries = 5;
+	public static RoomSize RoomSizes = RoomSize.LARGE;
+	public static int RoomTries = 10;
 	public static int RoomPadding = 3;
-	public static int RoomAttempts = 1000;
-	public static int RoomMaxNumPlace = 1;
+	public static int RoomAttempts = 2000;
+	public static int RoomMaxNumPlace = 2;
 	
 	public static int RoomMaxDoors = 2;
 	public static int RoomDoorDistance = 10;
 	
 	public static int RoomDoorPercent = 5;
-	public static int PathDeadEndPercent = 0;
-	public static int PathSameDirectionPercent = 0;
+	public static int PathDeadEndPercent = DeadEndPercent.NONE.percent;
+	public static int PathSameDirectionPercent = PathStraightness.STRAIGHT.percent;
 	
 	private static Random rand = new Random();
 	
@@ -98,6 +106,7 @@ public final class Global {
 			min = r.x;
 			max = r.y;
 		}
+		
 		public static RoomSize get(int index) {
 			return getValues().get(index);
 		}
@@ -111,5 +120,46 @@ public final class Global {
 		public static List<RoomSize> getValues() {
 			return Arrays.asList(Arrays.copyOfRange(values(), 0, values().length - 1));
 		}
+	}
+	
+	public enum PathLength {
+		SHORT(2),
+		MEDIUM(4),
+		LONG(6);
+		
+		public final int length;
+		PathLength(int l) {
+			length = l;
+		}
+	}
+	
+	public enum PathStraightness {
+		STRAIGHT(80),
+		WINDY(50),
+		MAZE(0);
+		
+		public final int percent;
+		private PathStraightness(int p) {
+			percent = p;
+		}
+	}
+	
+	public enum DeadEndPercent {
+		NONE(0),
+		MINIMAL(20),
+		SOME(50),
+		MANY(80);
+		
+		public final int percent;
+		DeadEndPercent(int p) {
+			percent = p;
+		}
+	}
+	
+	public enum DoorTypes {
+		NONE,
+		BASIC,
+		SECURE,
+		TRAPPED;
 	}
 }

@@ -1,8 +1,10 @@
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.util.Arrays;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.SwingUtilities;
 
 public class MapMaker {
 	
@@ -14,10 +16,11 @@ public class MapMaker {
 	private static void createAndShowGui() {
 		window = new JFrame("Map Creator");
 		
-		mapPanel = new MapLayoutPanel(Global.DEFAULT_MAP_W, Global.DEFAULT_MAP_H);
+		mapPanel = new MapLayoutPanel(Global.MapWidth, Global.MapHeight);
 		
 		optionsPanel = new OptionsPanel(mapPanel, Global.DEFAULT_WINDOW_H);
-		optionsPanel.setPreferredSize(new Dimension(200, Global.DEFAULT_WINDOW_H));
+		optionsPanel.setPreferredSize(new Dimension(Global.DEFAULT_OPTION_W,
+				Global.DEFAULT_WINDOW_H));
 		
 		mapPanelHolder = new JScrollPane(mapPanel);
 		
@@ -29,7 +32,7 @@ public class MapMaker {
 		
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.setSize(Global.DEFAULT_WINDOW_W, Global.DEFAULT_WINDOW_H);
-		window.getContentPane().add(splitpane, BorderLayout.CENTER);
+		window.getContentPane().add(splitpane, BorderLayout.WEST);
 		window.setVisible(true);
 	};
 	

@@ -2,16 +2,19 @@ import java.util.ArrayList;
 
 public class GridMap {
 	private ArrayList<ArrayList<Grid>> internal;
-	
+
 	public GridMap(int height, int width) {
-		internal = new ArrayList<>(width);
-		for(int i = 0; i < width; i++){
-			ArrayList<Grid> t = new ArrayList<Grid>(height);
-			for (int j = 0; j < height; j++){
+		internal = new ArrayList<>(height);
+		for(int i = 0; i < height; i++){
+			ArrayList<Grid> t = new ArrayList<Grid>(width);
+			for (int j = 0; j < width; j++){
 				t.add(new Grid(i, j));
 			}
 			internal.add(t);
 		}
+	}
+	public GridMap(ArrayList<ArrayList<Grid>> map) {
+		internal = map;
 	}
 	
 	public Grid get(Grid g) {
@@ -75,11 +78,23 @@ public class GridMap {
 	public void clear() {
 		for(int i = 0; i < getWidth(); i++){
 			for (int j = 0; j < getHeight(); j++){
-				Grid g = internal.get(i).get(j);
+				Grid g = internal.get(j).get(i);
 				g.active = false;
 				g.type = Grid.Type.CLOSE;
 			}
 		}
+	}
+	
+	public double percentFilled() {
+		double all = 0.0;
+		double active = 0.0;
+		for(ArrayList<Grid> arr : internal) {
+			for(Grid g : arr) {
+				all++;
+				if(g.active) active++;
+			}
+		}
+		return active/all * 100;
 	}
 	
 	@Override

@@ -6,11 +6,12 @@ import java.util.Map.Entry;
 public class MapLayout {
 	private GridMap map;
 	
-	private List<Path> paths;
-	
 	public MapLayout(int x, int y) {
 		map = new GridMap(x, y);
-		paths = new ArrayList<Path>();
+	}
+	
+	public MapLayout(GridMap m) {
+		map = m;
 	}
 	
 	public void activateGrid(Grid ... g) {
@@ -36,7 +37,6 @@ public class MapLayout {
 	
 	public void clear() {
 		map.clear();
-		paths.clear();
 	}
 	
 	/**
@@ -75,30 +75,48 @@ public class MapLayout {
 		}
 	}
 
-	public void generateMap(int attempts, Global.RoomSize size) {
-		List<Room> rooms = Room.generateRooms(size, this);
-		paths = generateMaze();
-		System.out.println();
+	public void generateMap() {
+		List<Room> rooms = Room.generateRooms(Global.RoomSizes, this);
+		List<Path> paths = generateMaze();
+		findDoors(rooms);
 		selectDoors(findDoors(rooms));
-		prunePaths();
+		prunePaths(paths);
+		
+		System.out.println("Filled: " + map.percentFilled());
 	}
 
 	/**
 	 * Generate the Maze
 	 */
 	public ArrayList<Path> generateMaze() {
+		int[] seed = findSeed();
 		ArrayList<Path> paths = new ArrayList<>();
-		for(int y = 1; y < map.getHeight(); y += 2) {
-			for(int x = 1; x < map.getWidth(); x += 2) {
+		for(int y = seed[1]; y < map.getHeight(); y += 2) {
+			for(int x = seed[0]; x < map.getWidth(); x += 2) {
 				if(getGrid(y, x) != null && !getGrid(y, x).active) {
 					Path p = new Path();
 					p.createPath(x, y, this);
-					paths.add(p);
-					System.out.println("Created Path: " + p.length);
+					if(p.length > Global.PathMinLength) {
+						paths.add(p);
+						System.out.println("Created Path: " + p.length);
+					} else {
+						p.clearPath(this);
+					}
 				}
 			}
 		}
 		return paths;
+	}
+	
+	private int[] findSeed() {
+		int x, y = 1;
+		do {
+			x = Global.generateRandomOddInt(map.getWidth() / 4, 1);
+			y = Global.generateRandomOddInt(map.getHeight() / 4, 1);
+		}
+		while(map.get(x, y).active);
+		
+		return new int[]{x, y};
 	}
 
 	private HashMap<Room,List<Grid>> selectDoors(HashMap<Room, List<Grid>> doors) {
@@ -132,7 +150,10 @@ public class MapLayout {
 				try {
 				Grid g = map.get(x, r.y - 1);
 				Grid g2 = map.get(x, r.y - 2);
-				if(!g.active && g2.active) rd.add(g);
+				if(!g.active && g2.active){
+					rd.add(g);
+//					setGrid(g, Grid.Type.TESTER);
+				}
 
 				Grid g3 = map.get(x, r.y + r.h);
 				Grid g4 = map.get(x, r.y + r.h + 1);
@@ -144,7 +165,10 @@ public class MapLayout {
 				try {
 				Grid g = map.get(r.x - 1, y);
 				Grid g2 = map.get(r.x - 2, y);
-				if(!g.active && g2.active) rd.add(g);
+				if(!g.active && g2.active) {
+					rd.add(g);
+//					setGrid(g, Grid.Type.TESTER);
+				}
 
 				Grid g3 = map.get(r.x + r.w, y);
 				Grid g4 = map.get(r.x + r.w + 1, y);
@@ -161,32 +185,42 @@ public class MapLayout {
 		g.type = Grid.Type.DOOR;
 	}
 	
-	public void prunePaths() {
+	public void prunePaths(List<Path> paths) {
 		for(Path p : paths) {
 			p.prunePath(this);
 		}
 	}
 	
 	public void printGrid(Grid g) {
-		for(Path p : paths) {
-			TreeNode<Grid> r = p.getNode(g);
-			if(r != null) {
-				printNode(r);
-			}
+		if(g != null) {
+			System.out.println("Grid: " + g);
+			System.out.println("Active: " + g.active);
+			System.out.println("Type: " + g.type);
+		} else {
+			System.out.println("Out of Bounds");
 		}
-		System.out.println("Grid: " + g);
-		System.out.println("Active: " + g.active);
-		System.out.println("Type: " + g.type);
 	}
 	
+//	public void printGrid(Grid g) {
+//		for(Path p : paths) {
+//			TreeNode<Grid> r = p.getNode(g);
+//			if(r != null) {
+//				printNode(r);
+//			}
+//		}
+//		System.out.println("Grid: " + g);
+//		System.out.println("Active: " + g.active);
+//		System.out.println("Type: " + g.type);
+//	}
+	
 	/******************************************************/
-	public void printNode(TreeNode<Grid> t) {
-		System.out.println("Grid: " + t.data);
-		System.out.println("Parent: " + t.parent);
-		System.out.println("Children: " + t.children);
-		System.out.println("isLeaf: " + t.isLeaf());
-		System.out.println("NextToDoor: " + t.data.isNextToDoor(this));
-	}
+//	public void printNode(TreeNode<Grid> t) {
+//		System.out.println("Grid: " + t.data);
+//		System.out.println("Parent: " + t.parent);
+//		System.out.println("Children: " + t.children);
+//		System.out.println("isLeaf: " + t.isLeaf());
+//		System.out.println("NextToDoor: " + t.data.isNextToDoor(this));
+//	}
 	
 	public String toString() {
 		return map.toString();

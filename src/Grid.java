@@ -52,6 +52,11 @@ public class Grid implements Comparable<Grid> {
 		return Math.sqrt(dx + dy);
 	}
 	
+	public void clear() {
+		active = false;
+		type = Type.OPEN;
+	}
+	
 	@Override
 	public String toString() {
 		return "X: " + x + " Y: " + y;

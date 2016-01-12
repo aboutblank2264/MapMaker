@@ -1,11 +1,12 @@
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+
 
 public class Path {
 	public TreeNode<Grid> path;
 	private List<TreeNode<Grid>> deadEnds;
 	public int length = 0;
-	
 	
 	public void createPath(int x, int y, MapLayout map) {
 
@@ -15,6 +16,7 @@ public class Path {
 
 		path = new TreeNode<Grid>(cur);
 		map.activateGrid(cur);
+//		cur.type = Grid.Type.TESTER;
 		length = 1;
 		if(deadEnds == null) deadEnds = new ArrayList<>();
 		deadEnds.add(path);
@@ -86,26 +88,18 @@ public class Path {
 		return open;
 	}
 
-	/**
-	 * when to prune:
-	 * has no children
-	 * does not have a door
-	 * within prune-[variable] strictness
-	 */
 	public void prunePath(MapLayout map) {
 		for(TreeNode<Grid> node : deadEnds) {
-			if(node.parent != null && !node.children.isEmpty()) {
+			if(node.parent != null && !node.children.isEmpty() ||
+					Global.generateChance(Global.PathDeadEndPercent)) {
 				continue;
 			}
-
-			if (Global.generateChance(Global.PathDeadEndPercent)) continue;
-
+			
 			TreeNode<Grid> cnode = node;
 			tail:
 			while(cnode.isLeaf()) {
 				if(!cnode.data.isNextToDoor(map)) {
 					map.deactivateGrid(cnode.data);
-//					map.setGrid(cnode.data, Grid.Type.TESTER);
 					if(!(cnode.isRoot())) {
 						TreeNode<Grid> t = cnode.parent;
 						cnode.remove();
@@ -119,7 +113,6 @@ public class Path {
 			head:
 			while(cnode.isRoot()) {
 				if(!cnode.data.isNextToDoor(map) && cnode.children.size() <= 1) {
-//					map.setGrid(cnode.data, Grid.Type.TESTER);
 					map.deactivateGrid(cnode.data);
 					if(cnode.children.size() != 0) {
 						TreeNode<Grid> t = cnode.children.get(0);
@@ -129,9 +122,6 @@ public class Path {
 						cnode.remove();
 					}
 				} else {
-//					map.printNode(cnode);
-//					System.out.println();
-//					System.out.println(cnode.children.size());
 					break head;
 				}
 			}
@@ -139,7 +129,11 @@ public class Path {
 		deadEnds = null;
 	}
 	
-	public void clearPath() {
+	public void clearPath(MapLayout map) {
+		for(Iterator<TreeNode<Grid>> iter = path.iterator(); iter.hasNext(); ) {
+			TreeNode<Grid> g = iter.next();
+			map.deactivateGrid(g.data);
+		}
 		path = null;
 		length = 0;
 	}

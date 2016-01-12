@@ -13,11 +13,16 @@ public class MapLayoutPanel extends JPanel {
 	private MapLayout layout;
 	private int panelWidth, panelHeight;
 	private double gridRectSize = Global.DEFAULT_GRID_RECT_SIZE;
+
+	private boolean editable = false;
+	private boolean isGenerating = false;
 	
 	public MapLayoutPanel(int mapX, int mapY) {
 		panelWidth = (int)(mapX * gridRectSize);
 		panelHeight = (int)(mapY * gridRectSize);
+		
 		layout = new MapLayout(mapX, mapY);
+		
 		addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -55,28 +60,45 @@ public class MapLayoutPanel extends JPanel {
 		return (int) ((Math.round(val/gridRectSize)) * gridRectSize);
 	}
 	
+	
+	public void setMapLayout(GridMap m) {
+		layout = new MapLayout(m);
+		repaint();
+	}
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		
 		g.setColor(Color.BLACK);
-		g.fillRect(0, 0, (int)(gridRectSize * layout.getWidth()),
-				(int)(gridRectSize * layout.getHeight()));
-
-		// draw active grids
-		for(int x = 0; x < layout.getWidth(); x++) {
-			for(int y = 0; y < layout.getHeight(); y++) {
+		g.fillRect(0, 0, (int)(gridRectSize * layout.getHeight()),
+				(int)(gridRectSize * layout.getWidth()));
+		drawGrid(g);
+	}
+	
+	private void drawGrid(Graphics g) {
+		for(int y = 0; y < layout.getHeight(); y++) {
+			for(int x = 0; x < layout.getWidth(); x++) {
 				Grid r = layout.getGrid(x, y); 
-				if(r.active) {
+				if(r != null && r.active) {
 					g.setColor(Color.LIGHT_GRAY);
 					g.drawRect((int)(r.x * gridRectSize),(int) (r.y * gridRectSize),
 							(int)gridRectSize -1, (int)gridRectSize -1);
-
-					if(r.type == Grid.Type.DOOR) g.setColor(Color.YELLOW);
-					else if(r.type == Grid.Type.DEADEND) g.setColor(Color.BLACK);
-					else if (r.type == Grid.Type.TESTER) g.setColor(Color.GREEN);
-					else if (r.type == Grid.Type.ERROR) g.setColor(Color.RED);
-					else g.setColor(Color.WHITE);
+					switch(r.type) {
+					case DOOR:
+						g.setColor(Color.YELLOW);
+						break;
+					case DEADEND:
+						g.setColor(Color.BLACK);
+						break;
+					case TESTER:
+						g.setColor(Color.GREEN);
+						break;
+					case ERROR:
+						g.setColor(Color.RED);
+						break;
+					default:
+						g.setColor(Color.WHITE);
+					};
 					g.fillRect((int)(r.x * gridRectSize + 1),(int) (r.y * gridRectSize + 1),
 							(int)gridRectSize - 1, (int)gridRectSize - 1);
 				}
@@ -89,14 +111,17 @@ public class MapLayoutPanel extends JPanel {
 		repaint();
 	}
 
-	private boolean editable = false;
 	public void canEdit() {
 		editable = !editable;
 	}
 	
 	public void generateMap() {
-		clearMap();
-		layout.generateMap(20, Global.RoomSize.LARGE);
+		if(!isGenerating) {
+			isGenerating = true;
+			clearMap();
+			layout.generateMap();
+			isGenerating = false;
+		}
 		repaint();
 	}
 
