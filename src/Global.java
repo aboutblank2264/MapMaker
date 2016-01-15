@@ -8,12 +8,12 @@ public final class Global {
 	public final static int MAXIMUM_MAP_SIZE = 151;
 	public final static int DEFAULT_MAP_W = 45;
 	public final static int DEFAULT_MAP_H = 41;
-	public final static int DEFAULT_WINDOW_W = 975;
+	public final static int DEFAULT_WINDOW_W = 885;
 	public final static int DEFAULT_WINDOW_H = 620;
 	public final static int DEFAULT_OPTION_W = 175;
 	public final static double DEFAULT_GRID_RECT_SIZE = 15;
 	
-	public final static int MINIMUM_PATH_CREATE_LENGTH = 10;
+	public final static int MINIMUM_PATH_CREATE_LENGTH = 15;
 	
 	public static int MapWidth = DEFAULT_MAP_W;
 	public static int MapHeight = DEFAULT_MAP_H;

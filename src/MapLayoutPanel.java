@@ -11,16 +11,12 @@ import javax.swing.JPanel;
 public class MapLayoutPanel extends JPanel {
 	private static final long serialVersionUID = 1L; //make warning go away
 	private MapLayout layout;
-	private int panelWidth, panelHeight;
 	private double gridRectSize = Global.DEFAULT_GRID_RECT_SIZE;
 
 	private boolean editable = false;
 	private boolean isGenerating = false;
 	
 	public MapLayoutPanel(int mapX, int mapY) {
-		panelWidth = (int)(mapX * gridRectSize);
-		panelHeight = (int)(mapY * gridRectSize);
-		
 		layout = new MapLayout(mapX, mapY);
 		
 		addMouseListener(new MouseAdapter() {
@@ -65,6 +61,7 @@ public class MapLayoutPanel extends JPanel {
 		layout = new MapLayout(m);
 		repaint();
 	}
+	
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
@@ -88,7 +85,7 @@ public class MapLayoutPanel extends JPanel {
 						g.setColor(Color.YELLOW);
 						break;
 					case DEADEND:
-						g.setColor(Color.BLACK);
+						g.setColor(Color.BLUE);
 						break;
 					case TESTER:
 						g.setColor(Color.GREEN);
@@ -115,18 +112,33 @@ public class MapLayoutPanel extends JPanel {
 		editable = !editable;
 	}
 	
+	// Don't use generateMap. use MapGeneratorWorker instead
 	public void generateMap() {
 		if(!isGenerating) {
 			isGenerating = true;
-			clearMap();
+			
+			layout = new MapLayout(Global.MapWidth, Global.MapHeight);
 			layout.generateMap();
 			isGenerating = false;
 		}
 		repaint();
 	}
 
+	public MapLayout getMapLayout() {
+		return layout;
+	}
+	
+	public void setMapLayout(MapLayout layout) {
+		this.layout = layout;
+		getParent().revalidate();
+	}
+	
 	@Override
 	public Dimension getPreferredSize() {
+
+		int panelWidth = (int)(Global.MapWidth * gridRectSize);
+		int panelHeight = (int)(Global.MapHeight * gridRectSize);
+		
 		return new Dimension(panelWidth, panelHeight);
 	}
 }

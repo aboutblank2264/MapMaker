@@ -78,17 +78,33 @@ public class MapLayout {
 	public void generateMap() {
 		List<Room> rooms = Room.generateRooms(Global.RoomSizes, this);
 		List<Path> paths = generateMaze();
-		findDoors(rooms);
+//		findDoors(rooms);
 		selectDoors(findDoors(rooms));
 		prunePaths(paths);
 		
 		System.out.println("Filled: " + map.percentFilled());
 	}
+	
+	/**
+	 * Split up generation methods
+	 */
+	
+	public List<Room> generateRooms() {
+		return Room.generateRooms(Global.RoomSizes, this);
+	}
+	
+	public List<Path> generatePaths() {
+		return generateMaze();
+	}
+	
+	public HashMap<Room, List<Grid>> generateDoors(List<Room> rooms) {
+		return selectDoors(findDoors(rooms));
+	}
 
 	/**
 	 * Generate the Maze
 	 */
-	public ArrayList<Path> generateMaze() {
+	private ArrayList<Path> generateMaze() {
 		int[] seed = findSeed();
 		ArrayList<Path> paths = new ArrayList<>();
 		for(int y = seed[1]; y < map.getHeight(); y += 2) {
