@@ -112,7 +112,7 @@ public class MapLayoutPanel extends JPanel {
 		editable = !editable;
 	}
 	
-	// Don't use generateMap. use MapGeneratorWorker instead
+	// Don't use generateMap. use MapGeneratorWorker
 	public void generateMap() {
 		if(!isGenerating) {
 			isGenerating = true;

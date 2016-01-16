@@ -1,6 +1,5 @@
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -34,6 +33,8 @@ public class OptionsPanel extends JPanel implements ActionListener, ChangeListen
 	
 	private boolean equals = false;
 	
+	private Thread genThread;
+	
 	public OptionsPanel(MapLayoutPanel m, int height) {
 		map = m;
 		setLayout(new BorderLayout());
@@ -45,6 +46,8 @@ public class OptionsPanel extends JPanel implements ActionListener, ChangeListen
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String action = e.getActionCommand();
+		
+//		System.out.println(action);
 		
 		switch(action) {
 		case "clear":
@@ -79,24 +82,29 @@ public class OptionsPanel extends JPanel implements ActionListener, ChangeListen
 			Global.RoomSizes = ((Global.RoomSize)room_combo.getSelectedItem());
 			break;
 		case "choose":
-			importFile();
-			break;
-		case "step":
-			SwingWorker<MapLayout, MapLayout> worker = MapGeneratorWorker.getWorker();
-			//if the worker is not null
-			if(worker != null) {
-				worker.notify();
-				System.out.println("notified");
-			} else {
-				MapGeneratorWorker.generate(map, true);
+			JFileChooser fc = new JFileChooser();
+			fc.setDialogTitle("Choose a text map file");
+			fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			fc.setFileFilter(new FileNameExtensionFilter("Text Files", "txt"));
+			fc.setCurrentDirectory(new File("src/../"));
+			int returnVal = fc.showOpenDialog(this);
+			if(returnVal == JFileChooser.APPROVE_OPTION) {
+				txtImport.setText(fc.getSelectedFile().getAbsolutePath());
+				GridMap m = MapImportExport.importMap(fc.getSelectedFile());
+				if(m != null) {
+					map.setMapLayout(m);
+				}
 			}
 			break;
 		case "generate":
-			if(MapGeneratorWorker.getWorker() != null) {
-				MapGeneratorWorker.getWorker().cancel(true);
-				System.out.println("Canceled");
-			}
-			MapGeneratorWorker.generate(map);
+			map.generateMap();
+//			if(genThread == null || !genThread.isAlive()) {
+//				genThread = new Thread(new GenerateRunner());
+//				genThread.start();
+//			} else {
+//				System.out.println(genThread.getName() + " " + genThread.getState());
+//				genThread.interrupt();
+//			}
 			break;
 		}
 	}
@@ -281,7 +289,7 @@ public class OptionsPanel extends JPanel implements ActionListener, ChangeListen
 		JLabel lblRoomSize = new JLabel("Room Size");
 		lblRoomSize.setFont(defaultFont);
 		gridbag.insets = textInset;
-		gridbag.gridx = 0;
+		gridbag.gridx = 1;
 		gridbag.gridy++;
 		optionpanel.add(lblRoomSize, gridbag);
 
@@ -290,7 +298,7 @@ public class OptionsPanel extends JPanel implements ActionListener, ChangeListen
 		room_combo.setSelectedIndex(Global.RoomSizes.ordinal());
 		room_combo.setFont(comboFont);
 		gridbag.insets = comboInset;
-		gridbag.gridx = 0;
+		gridbag.gridx = 1;
 		gridbag.gridy++;
 		optionpanel.add(room_combo, gridbag);
 
@@ -344,16 +352,6 @@ public class OptionsPanel extends JPanel implements ActionListener, ChangeListen
 		gridbag.gridy++;
 		optionpanel.add(chckEdit, gridbag);
 		
-		
-		JButton btn_step = new JButton("Step");
-		btn_step.setActionCommand("step");
-		btn_step.addActionListener(this);
-		btn_step.setFont(defaultFont);
-		gridbag.insets = buttonInset;
-		gridbag.gridx = 0;
-		gridbag.gridy++;
-		optionpanel.add(btn_step, gridbag);
-		
 		return optionpanel;
 	}
 	
@@ -392,36 +390,22 @@ public class OptionsPanel extends JPanel implements ActionListener, ChangeListen
 		
 		return bpanel;
 	}
+	
+	public void updateSettings() {
+		
+	}
 
-	
-	private void enableComponents(Container container, boolean turn) {
-		 Component[] components = container.getComponents();
-	        for (Component component : components) {
-	            component.setEnabled(turn);
-	            if (component instanceof Container) {
-	                enableComponents((Container)component, turn);
-	            }
-	        }
-	}
-	
-	private void importFile() {
-		JFileChooser fc = new JFileChooser();
-		fc.setDialogTitle("Choose a text map file");
-		fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		fc.setFileFilter(new FileNameExtensionFilter("Text Files", "txt"));
-		fc.setCurrentDirectory(new File("src/../"));
-		int returnVal = fc.showOpenDialog(this);
-		if(returnVal == JFileChooser.APPROVE_OPTION) {
-			txtImport.setText(fc.getSelectedFile().getAbsolutePath());
-			GridMap m = MapImportExport.importMap(fc.getSelectedFile());
-			if(m != null) {
-				map.setMapLayout(m);
-			}
-		}
-	}
-	
 	@Override
 	public Dimension getPreferredSize() {
-		return new Dimension(Global.DEFAULT_OPTION_W, getHeight());
+		return new Dimension(200, getHeight());
+	}
+	
+	public class GenerateRunner implements Runnable {
+		
+		public void run() {
+			System.out.println("Begin Generating");
+			map.generateMap();
+			System.out.println("End Generating\n");
+		}
 	}
 }
